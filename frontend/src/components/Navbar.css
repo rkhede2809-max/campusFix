@@ -1,0 +1,7 @@
+/* Navbar uses shared layout classes from index.css.
+   This file exists so the navbar stays a reusable styled component. */
+.topbar p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
