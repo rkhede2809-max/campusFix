@@ -1,6 +1,6 @@
 import ComplaintCard from './ComplaintCard.jsx';
 
-function ComplaintList({ complaints, loading, loadFailed, onStatusChange, onDelete, busyId }) {
+function ComplaintList({ complaints, loading, loadFailed, onStatusChange, onAssign, onDelete, busyId, user, staff }) {
   if (loading) {
     return (
       <div className="loading-state">
@@ -23,7 +23,7 @@ function ComplaintList({ complaints, loading, loadFailed, onStatusChange, onDele
     return (
       <div className="empty-state">
         <h4>No complaints found</h4>
-        <p>Submit a new complaint or change the category and status filters.</p>
+        <p>There are no complaints to show. Change the category or status filters if needed.</p>
       </div>
     );
   }
@@ -34,7 +34,10 @@ function ComplaintList({ complaints, loading, loadFailed, onStatusChange, onDele
         <ComplaintCard
           key={complaint._id}
           complaint={complaint}
+          user={user}
+          staff={staff}
           onStatusChange={onStatusChange}
+          onAssign={onAssign}
           onDelete={onDelete}
           busyId={busyId}
         />

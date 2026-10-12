@@ -49,10 +49,36 @@ const complaintSchema = new mongoose.Schema({
     },
     default: 'Pending'
   },
+  priority: {
+    type: String,
+    enum: ['Low', 'Medium', 'High'],
+    default: 'Medium'
+  },
+  reportedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
+  departmentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
+});
+
+complaintSchema.index({ reportedBy: 1, createdAt: -1 });
+complaintSchema.index({ departmentId: 1, status: 1 });
+complaintSchema.pre('save', function updateTimestamp(next) {
+  this.updatedAt = new Date();
+  next();
 });
 
 const Complaint = mongoose.model('Complaint', complaintSchema);

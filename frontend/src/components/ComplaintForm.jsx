@@ -16,7 +16,7 @@ const emptyForm = {
   location: ''
 };
 
-function ComplaintForm({ onSubmit, submitting }) {
+function ComplaintForm({ onSubmit, submitting, departments }) {
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
 
@@ -39,6 +39,7 @@ function ComplaintForm({ onSubmit, submitting }) {
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,
+        departmentId: form.departmentId || undefined,
         location: form.location.trim()
       });
       setForm(emptyForm);
@@ -61,6 +62,15 @@ function ComplaintForm({ onSubmit, submitting }) {
             onChange={handleChange}
             placeholder="Broken fan in Room 204"
           />
+        </div>
+        <div className="form-group">
+          <label htmlFor="departmentId">Service department</label>
+          <select id="departmentId" name="departmentId" value={form.departmentId || ''} onChange={handleChange}>
+            <option value="">Choose a department (optional)</option>
+            {departments.map((department) => (
+              <option key={department._id} value={department._id}>{department.name}</option>
+            ))}
+          </select>
         </div>
         <div className="form-group">
           <label htmlFor="description">Description</label>

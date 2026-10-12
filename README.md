@@ -1,227 +1,143 @@
 # CampusFix – Campus Problem Reporting System
 
-CampusFix is a beginner-friendly MERN project. College students can report campus maintenance problems and track whether each complaint is Pending, In Progress, or Resolved.
+CampusFix is an existing React + Vite frontend backed by an Express REST API and MongoDB/Mongoose. It lets students and faculty report campus issues, staff work on assigned issues, and administrators manage departments, users, assignments, and complaint progress.
 
-This project uses:
-
-- HTML, CSS, and JavaScript
-- React with Vite for the frontend
-- Node.js and Express for the REST API
-- MongoDB Atlas with Mongoose for the database
-- Fetch API for frontend-backend communication
-
-There is no login, payment, maps, or image upload in this first version.
-
-## Folder structure
+## Project structure
 
 ```text
-campusfix/
-  frontend/                 React + Vite app
-    src/
-      components/           Reusable UI pieces such as cards and form
-      pages/                Dashboard page
-      services/             Fetch API calls
-      App.jsx
-      main.jsx
-      index.css
-    index.html
-    package.json
-    .env.example
-    vite.config.js          Needed so Vite runs React on port 5173
-  backend/                  Express API
-    models/                 Complaint schema
-    routes/                 Complaint endpoints
+campusFix/
+  backend/
+    middleware/             Authentication and role authorization
+    models/                  Mongoose schemas and relationships
+    routes/                  Authentication, complaints, users, departments, notifications
     server.js
-    seed.js                 Optional sample data, run only when you want it
-    package.json
+    seed.js                  Optional legacy sample complaints
     .env.example
-  README.md
-  .gitignore
+  frontend/
+    src/
+      components/            Dashboard, complaint, auth, admin, and notification UI
+      pages/Dashboard.jsx
+      services/api.js
+    .env.example
 ```
 
-## How the request flow works
+## Requirements and setup
 
-1. Student fills the complaint form in React.
-2. React calls `frontend/src/services/api.js`.
-3. Fetch sends JSON to Express, for example `POST http://localhost:5000/api/complaints`.
-4. Express validates the data and uses Mongoose to save it in MongoDB Atlas.
-5. MongoDB returns the saved complaint.
-6. Express sends that JSON back to React.
-7. The dashboard updates totals, cards, and filters.
+- Node.js LTS and npm
+- A MongoDB database (Atlas or a reachable MongoDB server)
 
-React never talks to MongoDB directly. All database work goes through Express.
-
-## 1. Install required tools
-
-Install these before starting:
-
-- [Node.js LTS](https://nodejs.org/) (this also installs npm)
-- A code editor such as Cursor or VS Code
-- A free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account
-
-Open **Windows PowerShell** and check Node.js:
-
-```powershell
-node -v
-npm -v
-```
-
-## 2. Create environment files
-
-Copy the example files. Do not commit real passwords.
-
-```powershell
-cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix"
-Copy-Item backend\.env.example backend\.env
-Copy-Item frontend\.env.example frontend\.env
-```
-
-Then open `backend/.env` and replace the placeholder with **your own** Atlas URI.
-
-`frontend/.env` should stay:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-`backend/.env` should look like this shape (use your values, not this password):
-
-```env
-PORT=5000
-MONGODB_URI=mongodb+srv://YOUR_DB_USERNAME:YOUR_DB_PASSWORD@YOUR_CLUSTER.mongodb.net/campusfix?retryWrites=true&w=majority
-```
-
-If your Atlas password contains special characters such as `@`, `#`, or `/`, URL-encode them in the URI.
-
-Never paste your real database password into chat or into Git.
-
-## 3. Create a MongoDB Atlas database
-
-1. Sign in at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
-2. Create a free **M0** cluster if you do not have one.
-3. Open **Database Access** and create a database user with a password you will remember.
-4. Open **Network Access** and add your current IP address. For a college demo on your laptop, you can also allow access from anywhere (`0.0.0.0/0`), but understand that this is less strict.
-5. Open **Database**, click **Connect**, choose **Drivers**, and copy the connection string.
-6. Replace `<password>` with your database user password.
-7. Add a database name before the `?`, for example `/campusfix?retryWrites=true&w=majority`.
-8. Paste that string into `backend/.env` as `MONGODB_URI`.
-
-## 4. Install frontend dependencies
-
-The frontend is already a Vite + React JavaScript app. You do not need to run `npm create vite` again unless you start over.
+Install dependencies in the existing frontend and backend directories:
 
 ```powershell
 cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\frontend"
 npm install
-```
-
-If you ever recreate it from scratch, the command is:
-
-```powershell
-npm create vite@latest frontend -- --template react
-```
-
-Then replace the generated TypeScript/demo files with the JavaScript files from this project.
-
-## 5. Install backend dependencies
-
-```powershell
-cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\backend"
+cd ..\backend
 npm install
 ```
 
-## 6. Optional: add sample complaints
+Configure `backend/.env` using [backend/.env.example](./backend/.env.example). The existing local `.env` is not tracked and is intentionally not populated with credentials. Set:
 
-Run this **once** after MongoDB is configured. The script does not insert duplicates if complaints already exist.
-
-```powershell
-cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\backend"
-npm run seed
+```env
+PORT=5000
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_URL_ENCODED_PASSWORD@YOUR_CLUSTER.mongodb.net/campusfix?retryWrites=true&w=majority
+JWT_SECRET=use_a_random_secret_at_least_32_characters_long
+BOOTSTRAP_ADMIN_NAME=CampusFix Administrator
+BOOTSTRAP_ADMIN_EMAIL=admin@example.edu
+BOOTSTRAP_ADMIN_PASSWORD=choose_a_unique_password_at_least_10_characters
 ```
 
-## 7. Start the backend (Terminal 1)
+Use your own MongoDB URI and URL-encode special characters in the database password. Generate a `JWT_SECRET` rather than reusing the database password (for example, `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`). Never commit either secret.
+
+On the first backend startup, the optional bootstrap variables create an administrator account using a scrypt password hash. Choose a unique admin email and a password of at least 10 characters. After the account is created, you may clear the bootstrap email/password; the account remains in MongoDB. Public sign-up only permits STUDENT and FACULTY. ADMIN accounts can create STAFF, ADMIN, and other user accounts from the administration panel.
+
+If desired, copy `frontend/.env.example` to `frontend/.env`; its default API URL is `http://localhost:5000/api`.
+
+Start the existing API and UI in separate PowerShell terminals:
 
 ```powershell
 cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\backend"
 npm start
 ```
 
-You should see:
-
-- `Connected to MongoDB Atlas`
-- `CampusFix API listening on http://localhost:5000`
-
-If connection fails, the server prints a clear error and exits. Check `MONGODB_URI`, the Atlas username/password, and Network Access.
-
-## 8. Start the frontend (Terminal 2)
-
 ```powershell
 cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\frontend"
 npm run dev
 ```
 
-Open this URL in your browser:
+Open <http://localhost:5173>. The backend requires both `MONGODB_URI` and a `JWT_SECRET` of at least 32 characters and will stop with a configuration error if either is missing.
 
-[http://localhost:5173](http://localhost:5173)
+## Roles and access
 
-## 9. Verify the API
+| Role | Capabilities |
+| --- | --- |
+| STUDENT | Submit complaints, view own complaints and history, rate own resolved complaints, view own notifications |
+| FACULTY | Submit complaints, view own complaints, history, and notifications |
+| STAFF | View assigned complaints, update their status with progress comments, view relevant notifications |
+| ADMIN | View all complaints, assign/reassign staff, update/delete complaints, manage users and departments, view dashboard statistics and history |
 
-Keep the backend running, then test in PowerShell:
+The backend enforces these permissions for every protected route. Password hashes are excluded from regular User queries and are never included in API responses. Access tokens expire after eight hours. Departments and users referenced by complaints, history, assignments, or notifications cannot be deleted in a way that would orphan records.
+
+## Data model overview
+
+- `User`: unique email, generated `userId`, hashed password, role, optional department.
+- `Department`: unique case-insensitive name and service contact details.
+- `Complaint`: preserves title, description, category, location, status, and timestamps; includes reporter, optional department, and priority.
+- `Assignment`: immutable assignment history; reassignment cancels the previous active record and creates a new record.
+- `ComplaintHistory`: status changes and staff progress comments, with actor and time.
+- `Feedback`: one 1–5 rating per reporter per resolved complaint.
+- `Notification`: in-app assignment and status/resolution updates, with read state.
+
+Complaint statuses remain `Pending`, `In Progress`, and `Resolved`; categories remain `Electrical`, `Plumbing`, `Cleanliness`, `Furniture`, `Internet`, and `Other`.
+
+## REST API
+
+Requests and responses use JSON. Protected endpoints require `Authorization: Bearer <token>`.
+
+| Method | Endpoint | Access / purpose |
+| --- | --- | --- |
+| POST | `/api/auth/register` | Public; register STUDENT or FACULTY |
+| POST | `/api/auth/login` | Public; sign in |
+| GET | `/api/auth/me` | Signed-in user profile |
+| GET, POST | `/api/users` | ADMIN; list users / create an account |
+| PATCH, DELETE | `/api/users/:id` | ADMIN; update / safely delete a user |
+| GET | `/api/users/staff` | ADMIN; list staff for assignment |
+| GET | `/api/departments` | Signed-in users; list departments |
+| POST | `/api/departments` | ADMIN; create a department |
+| PATCH, DELETE | `/api/departments/:id` | ADMIN; update / safely delete a department |
+| GET | `/api/complaints` | ADMIN all, STAFF assigned, reporters own complaints |
+| POST | `/api/complaints` | STUDENT or FACULTY; submit a complaint |
+| GET | `/api/complaints/:id` | Authorized complaint viewers; details, assignment, history, feedback |
+| PATCH | `/api/complaints/:id` | ADMIN; edit complaint fields |
+| PATCH | `/api/complaints/:id/status` | ADMIN or assigned STAFF; update status and optional comment |
+| POST | `/api/complaints/:id/assignments` | ADMIN; assign or reassign a STAFF user |
+| GET | `/api/complaints/:id/history` | Authorized complaint viewers |
+| POST, GET | `/api/complaints/:id/feedback` | Reporter submits after resolution; authorized viewers retrieve |
+| DELETE | `/api/complaints/:id` | ADMIN; delete complaint and its dependent history/assignment/feedback/notifications |
+| GET | `/api/notifications` | Signed-in user; own notifications and unread count |
+| PATCH | `/api/notifications/:id/read` | Mark own notification as read |
+| PATCH | `/api/notifications/read-all` | Mark all own notifications as read |
+| GET | `/api/health` | API/database health |
+
+Invalid data is rejected with a client error, unauthorized requests return 401/403, duplicate/conflicting records return 409, and missing records return 404.
+
+## Existing data and seed script
+
+Existing complaint records are retained and remain visible to ADMIN accounts. Older records without a `reportedBy` cannot be shown to a student/faculty account; assign ownership through an intentional data migration before enabling those records for reporters. Optional `backend/seed.js` creates legacy demo complaints without reporter accounts and is not needed for normal use.
+
+## Verification
+
+Build the frontend:
 
 ```powershell
-Invoke-RestMethod http://localhost:5000/api/health
-Invoke-RestMethod http://localhost:5000/api/complaints
+cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\frontend"
+npm run build
 ```
 
-Create a complaint:
+Check backend startup and MongoDB access:
 
 ```powershell
-Invoke-RestMethod -Method Post -Uri http://localhost:5000/api/complaints -ContentType "application/json" -Body '{"title":"Broken light in Lab 1","description":"Tube light is flickering and needs replacement.","category":"Electrical","location":"Lab 1"}'
+cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\backend"
+npm start
 ```
 
-Update status by replacing `COMPLAINT_ID`:
-
-```powershell
-Invoke-RestMethod -Method Patch -Uri http://localhost:5000/api/complaints/COMPLAINT_ID/status -ContentType "application/json" -Body '{"status":"In Progress"}'
-```
-
-Delete by replacing `COMPLAINT_ID`:
-
-```powershell
-Invoke-RestMethod -Method Delete -Uri http://localhost:5000/api/complaints/COMPLAINT_ID
-```
-
-## 10. Test the website
-
-1. Open [http://localhost:5173](http://localhost:5173).
-2. Confirm dashboard cards show totals.
-3. Submit a new complaint.
-4. Filter by category and status.
-5. Change a complaint from Pending to In Progress, then Resolved.
-6. Delete a complaint and confirm the dialog.
-7. Stop the backend and refresh to see the friendly “server unavailable” message.
-
-## Important files for viva
-
-- `backend/server.js`: starts Express only after MongoDB connects.
-- `backend/models/Complaint.js`: complaint fields and allowed status values.
-- `backend/routes/complaints.js`: GET, POST, PATCH, DELETE APIs.
-- `frontend/src/services/api.js`: all Fetch calls live here.
-- `frontend/src/pages/Dashboard.jsx`: loads data, updates stats, handles create/update/delete.
-
-## Hinglish explanation for viva
-
-CampusFix ek college complaint system hai. Student frontend pe form fill karta hai. React Fetch API se Express backend ko data bhejta hai. Express data check karta hai, phir Mongoose us complaint ko MongoDB Atlas mein save karta hai. Dashboard MongoDB se latest complaints nikal ke cards aur statistics dikhata hai. Status change ya delete bhi same flow se hota hai: React -> Express -> MongoDB -> React UI update.
-
-Aap yeh points bol sakte ho:
-
-- Frontend sirf UI hai, database se directly connect nahi hota.
-- Backend REST API `/api/complaints` handle karta hai.
-- Status sirf Pending, In Progress, aur Resolved ho sakta hai.
-- `.env` mein secret URI rakha hai, code ke andar password nahi likha.
-
-## Ports used
-
-- Backend API: `http://localhost:5000`
-- Frontend Vite app: `http://localhost:5173`
-- Frontend talks to: `http://localhost:5000/api`
+Then request `http://localhost:5000/api/health`. A database status of `connected` confirms the configured MongoDB connection.
