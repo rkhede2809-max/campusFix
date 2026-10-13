@@ -126,6 +126,15 @@ Existing complaint records are retained and remain visible to ADMIN accounts. Ol
 
 ## Verification
 
+Run the backend integration and end-to-end role workflows against a disposable in-memory MongoDB:
+
+```powershell
+cd "C:\Users\RACHANA'S LAPPY\OneDrive\Desktop\campusFix\backend"
+npm test
+```
+
+The test suite starts the real API on a temporary local port and uses MongoDB Memory Server; it sets its own local test URI and does not read or modify the configured Atlas database. The first run may need internet access to download the MongoDB test binary.
+
 Build the frontend:
 
 ```powershell
