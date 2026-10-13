@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CampusFix – Campus Problem Reporting System
 
 CampusFix is an existing React + Vite frontend backed by an Express REST API and MongoDB/Mongoose. It lets students and faculty report campus issues, staff work on assigned issues, and administrators manage departments, users, assignments, and complaint progress.
@@ -150,3 +151,6 @@ npm start
 ```
 
 Then request `http://localhost:5000/api/health`. A database status of `connected` confirms the configured MongoDB connection.
+=======
+# campusFix
+>>>>>>> 0c0d90daf8333be02c453d572ef0e1dcdd5d3e28
